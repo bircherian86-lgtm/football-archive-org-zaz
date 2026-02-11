@@ -1,0 +1,52 @@
+{
+  "placeholderImages": [
+    {
+      "id": "clip1",
+      "description": "A football player celebrating a goal in a packed stadium under floodlights.",
+      "imageUrl": "https://images.unsplash.com/photo-1762792760947-0f73f249c37d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Zm9vdGJhbGwlMjBjZWxlYnJhdGlvbnxlbnwwfHx8fDE3NzAyNDcwOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football celebration"
+    },
+    {
+      "id": "clip2",
+      "description": "A close-up of a football hitting the back of the net.",
+      "imageUrl": "https://images.unsplash.com/photo-1758934217889-1aec468a2d4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnb2FsJTIwbmV0fGVufDB8fHx8MTc3MDMxNDUxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "goal net"
+    },
+    {
+      "id": "clip3",
+      "description": "A goalkeeper making a dramatic save, diving to stop the ball.",
+      "imageUrl": "https://images.unsplash.com/photo-1671245166799-9639823eb9b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnb2Fsa2VlcGVyJTIwc2F2ZXxlbnwwfHx8fDE3NzAzMTQ1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "goalkeeper save"
+    },
+    {
+      "id": "clip4",
+      "description": "An aerial view of a football stadium during a match.",
+      "imageUrl": "https://images.unsplash.com/photo-1599158150601-1417ebbaafdd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMHN0YWRpdW18ZW58MHx8fHwxNzcwMjQ3MDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football stadium"
+    },
+    {
+      "id": "clip5",
+      "description": "Two players challenging for the ball in a midfield tackle.",
+      "imageUrl": "https://images.unsplash.com/photo-1631478854571-e06e4ca12a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHRhY2tsZXxlbnwwfHx8fDE3NzAzMTQ1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football tackle"
+    },
+    {
+      "id": "clip6",
+      "description": "A player taking a powerful free-kick.",
+      "imageUrl": "https://images.unsplash.com/photo-1661587535658-50048b8ec242?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmb290YmFsbCUyMGZyZWVraWNrfGVufDB8fHx8MTc3MDMxNDUxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football freekick"
+    },
+    {
+      "id": "clip7",
+      "description": "A football team huddling together before a match.",
+      "imageUrl": "https://images.unsplash.com/photo-1538352886333-5233ad94cb8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx0ZWFtJTIwaHVkZGxlfGVufDB8fHx8MTc3MDIzNjg2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team huddle"
+    },
+    {
+      "id": "clip8",
+      "description": "A player dribbling the ball past a defender.",
+      "imageUrl": "https://images.unsplash.com/photo-1718017205076-a8079473cf0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMGRyaWJibGV8ZW58MHx8fHwxNzcwMzE0NTE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football dribble"
+    }
+  ]
+}

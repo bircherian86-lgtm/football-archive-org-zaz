@@ -1,0 +1,127 @@
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+// Admin hardcoded credentials
+const ADMIN_USERNAME = "zazaep21";
+const ADMIN_PASSWORD = "bedwars2133";
+
+async function getUser(email: string) {
+    try {
+        return await prisma.user.findUnique({
+            where: { email }
+        });
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        return null;
+    }
+}
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
+    debug: true,
+    pages: {
+        signIn: '/login',
+    },
+    providers: [
+        Credentials({
+            async authorize(credentials) {
+                const emailOrUsername = credentials?.email as string;
+                const password = credentials?.password as string;
+
+                // Check for admin login (username)
+                if (emailOrUsername === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                    return {
+                        id: "admin",
+                        name: "Admin",
+                        email: ADMIN_USERNAME,
+                        role: "ADMIN",
+                    };
+                }
+
+                // Try to parse as email for regular user login
+                const emailValidation = z.string().email().safeParse(emailOrUsername);
+
+                if (emailValidation.success) {
+                    // It's a valid email, look up user
+                    const user = await getUser(emailValidation.data);
+                    if (user && password) {
+                        const passwordsMatch = await bcrypt.compare(password, user.password);
+                        if (passwordsMatch) {
+                            return {
+                                id: user.id,
+                                name: user.name,
+                                email: user.email,
+                                role: user.role || "USER",
+                                profilePicture: user.profilePicture,
+                                displayName: user.displayName,
+                                bannerImage: user.bannerImage,
+                                bio: user.bio,
+                            };
+                        }
+                    }
+                }
+
+                return null;
+            },
+        }),
+    ],
+    callbacks: {
+        async jwt({ token, user, trigger, session }) {
+            // When user first signs in
+            if (user) {
+                token.role = (user as any).role;
+                token.id = user.id;
+                token.profilePicture = (user as any).profilePicture;
+                token.displayName = (user as any).displayName;
+                token.bannerImage = (user as any).bannerImage;
+                token.bio = (user as any).bio;
+            }
+
+            // Handle session update trigger
+            if (trigger === "update" && session) {
+                token.displayName = session.displayName || token.displayName;
+                token.profilePicture = session.profilePicture || token.profilePicture;
+                token.bannerImage = session.bannerImage || token.bannerImage;
+                token.bio = session.bio || token.bio;
+            }
+
+            // Fetch fresh data from DB periodically/on refresh to ensure persistence
+            if (token.id) {
+                try {
+                    const freshUser = await prisma.user.findUnique({
+                        where: { id: token.id as string },
+                        select: {
+                            profilePicture: true,
+                            displayName: true,
+                            bannerImage: true,
+                            bio: true
+                        }
+                    });
+                    if (freshUser) {
+                        token.profilePicture = freshUser.profilePicture || token.profilePicture;
+                        token.displayName = freshUser.displayName || token.displayName;
+                        token.bannerImage = freshUser.bannerImage || token.bannerImage;
+                        token.bio = freshUser.bio || token.bio;
+                    }
+                } catch (e) {
+                    console.error("JWT refresh error:", e);
+                }
+            }
+
+            return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                (session.user as any).id = token.id;
+                (session.user as any).role = token.role;
+                (session.user as any).profilePicture = token.profilePicture;
+                (session.user as any).displayName = token.displayName;
+                (session.user as any).bannerImage = token.bannerImage;
+                (session.user as any).bio = token.bio;
+            }
+            return session;
+        }
+    }
+});
