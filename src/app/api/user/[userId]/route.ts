@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server';
 // GET - Fetch user profile and their clips
 export async function GET(
     req: Request,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
-        const { userId } = params;
+        const { userId } = await params;
 
         // Check for hardcoded admin
         let user;

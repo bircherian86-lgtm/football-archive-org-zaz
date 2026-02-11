@@ -6,10 +6,10 @@ import { randomBytes } from 'crypto';
 // GET - Fetch all comments for a clip
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const clipId = params.id;
+        const { id: clipId } = await params;
 
         const comments = await prisma.comment.findMany({
             where: { clipId },
@@ -46,7 +46,7 @@ export async function GET(
 // POST - Add a new comment
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -55,7 +55,7 @@ export async function POST(
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        const clipId = params.id;
+        const { id: clipId } = await params;
         const { content } = await req.json();
 
         if (!content || content.trim().length === 0) {

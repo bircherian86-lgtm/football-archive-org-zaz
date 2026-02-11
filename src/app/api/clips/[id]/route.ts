@@ -7,10 +7,10 @@ import path from "path";
 // GET - Fetch a single clip with uploader info
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const clipId = params.id;
+        const { id: clipId } = await params;
 
         const clip = await prisma.clip.findUnique({
             where: { id: clipId },
@@ -51,7 +51,7 @@ export async function GET(
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -60,7 +60,7 @@ export async function DELETE(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const clipId = params.id;
+        const { id: clipId } = await params;
 
         // Get clip info
         const clip = await prisma.clip.findUnique({

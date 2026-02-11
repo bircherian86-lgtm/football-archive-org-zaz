@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 // DELETE - Delete a comment
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string; commentId: string } }
+    { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
     try {
         const session = await auth();
@@ -14,7 +14,7 @@ export async function DELETE(
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        const { commentId } = params;
+        const { commentId } = await params;
         const userId = (session.user as any)?.id;
         const isAdmin = (session.user as any)?.role === 'ADMIN';
 

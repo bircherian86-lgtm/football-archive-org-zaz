@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -13,7 +13,7 @@ export async function POST(
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        const clipId = params.id;
+        const { id: clipId } = await params;
         const { featured } = await req.json();
 
         // Update clip featured status
