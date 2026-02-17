@@ -33,9 +33,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-neutral-900/80 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80" data-interactive="true">
-          <Film className="h-6 w-6 text-primary" />
-          <span className="font-headline text-lg font-bold text-foreground">
+        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80" data-interactive="true">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black font-headline text-2xl font-black text-white shadow-xl ring-1 ring-white/20">
+            F
+          </div>
+          <span className="font-headline text-xl font-bold tracking-tight text-foreground">
             Football Clips Archive
           </span>
         </Link>
