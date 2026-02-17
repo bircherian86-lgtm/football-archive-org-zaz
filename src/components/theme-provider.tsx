@@ -32,21 +32,25 @@ export function ThemeProvider({
   storageKey = 'ui-theme',
   themes = ['light', 'dark', 'midnight', 'sepia', 'nord'],
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
-  const [mounted, setMounted] = useState(false)
-
-  // On mount, read theme from localStorage and update state
-  useEffect(() => {
-    setMounted(true)
+  // Initialize theme from localStorage on mount, or use default
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return defaultTheme;
     try {
       const storedTheme = window.localStorage.getItem(storageKey) as Theme | null
       if (storedTheme && themes.includes(storedTheme)) {
-        queueMicrotask(() => setTheme(storedTheme));
+        return storedTheme;
       }
-    } catch (_e) {
+    } catch {
       // localStorage not available
     }
-  }, [storageKey, themes])
+    return defaultTheme;
+  })
+  const [mounted, setMounted] = useState(false)
+
+  // Set mounted flag after mount to avoid SSR hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Whenever theme changes, update localStorage and HTML class
   useEffect(() => {

@@ -1,12 +1,13 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 export async function GET() {
     try {
         const session = await auth();
 
-        if (!session || (session.user as any)?.role !== 'ADMIN') {
+        if (!session || (session.user as SessionUser)?.role !== 'ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
@@ -69,9 +70,9 @@ export async function GET() {
             },
             take: 10
         });
-        const storageByUser = usersWithClips.map((u: any) => ({
+        const storageByUser = usersWithClips.map((u) => ({
             email: u.email,
-            totalSize: u.clips.reduce((sum: number, c: any) => sum + (c.fileSize || 0), 0)
+            totalSize: u.clips.reduce((sum: number, c) => sum + (c.fileSize || 0), 0)
         })).sort((a, b) => b.totalSize - a.totalSize);
 
         // Recent admin actions
@@ -86,7 +87,7 @@ export async function GET() {
         });
 
         // Flatten adminEmail for compatibility
-        const formattedActions = recentActions.map((a: any) => ({
+        const formattedActions = recentActions.map((a) => ({
             ...a,
             adminEmail: a.admin?.email || 'System'
         }));

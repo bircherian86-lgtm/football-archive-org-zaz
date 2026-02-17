@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 // DELETE - Delete a comment
 export async function DELETE(
@@ -15,8 +16,12 @@ export async function DELETE(
         }
 
         const { commentId } = await params;
-        const userId = (session.user as any)?.id;
-        const isAdmin = (session.user as any)?.role === 'ADMIN';
+        const userId = (session.user as SessionUser)?.id;
+        const isAdmin = (session.user as SessionUser)?.role === 'ADMIN';
+        
+        if (!userId) {
+            return new NextResponse('User ID not found', { status: 400 });
+        }
 
         // Get comment to check ownership
         const comment = await prisma.comment.findUnique({

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { mutate } from 'swr';
 import { Session } from 'next-auth';
+import type { SessionUser } from '@/types/session';
 
 interface ClipCardProps {
   clip: Clip;
@@ -20,8 +21,8 @@ export function ClipCard({ clip, className, session }: ClipCardProps) {
   const { toast } = useToast();
 
   // Determine if user can delete this clip
-  const userRole = (session?.user as any)?.role;
-  const userId = (session?.user as any)?.id;
+  const userRole = (session?.user as SessionUser)?.role;
+  const userId = (session?.user as SessionUser)?.id;
   const isAdmin = userRole === 'ADMIN';
   const isOwner = clip.userId && clip.userId === userId;
   const canDelete = isAdmin || isOwner;
@@ -48,12 +49,12 @@ export function ClipCard({ clip, className, session }: ClipCardProps) {
 
       // Refresh the list
       mutate('/api/clips');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting clip:', error);
       toast({
         variant: 'destructive',
         title: 'Delete Failed',
-        description: error.message || 'Could not delete the clip. Check permissions.',
+        description: error instanceof Error ? error.message : 'Could not delete the clip. Check permissions.',
       });
     }
   };

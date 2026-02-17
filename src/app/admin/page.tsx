@@ -2,9 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, VideoIcon, HardDrive, TrendingUp, Upload, UserPlus } from 'lucide-react';
+import { Users, VideoIcon, HardDrive, Upload, UserPlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+
+interface Clip {
+    id: string;
+    title: string;
+    uploaderEmail?: string;
+    uploadDate: number;
+}
+
+interface User {
+    id: string;
+    email: string;
+    name?: string;
+    role: string;
+}
 
 interface AdminStats {
     stats: {
@@ -14,8 +28,8 @@ interface AdminStats {
         weeklySignups: number;
         weeklyUploads: number;
     };
-    recentClips: any[];
-    recentUsers: any[];
+    recentClips: Clip[];
+    recentUsers: User[];
 }
 
 export default function AdminDashboard() {
@@ -122,7 +136,7 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            {data.recentClips.slice(0, 5).map((clip: any) => (
+                            {data.recentClips.slice(0, 5).map((clip) => (
                                 <div
                                     key={clip.id}
                                     className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 p-3"
@@ -152,7 +166,7 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            {data.recentUsers.slice(0, 5).map((user: any) => (
+                            {data.recentUsers.slice(0, 5).map((user) => (
                                 <div
                                     key={user.id}
                                     className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 p-3"

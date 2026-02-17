@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 export async function POST(
     req: NextRequest,
@@ -9,12 +10,17 @@ export async function POST(
     try {
         const session = await auth();
 
-        if (!session || (session.user as any)?.role !== 'ADMIN') {
+        if (!session || (session.user as SessionUser)?.role !== 'ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
         const { id: userId } = await params;
         const { banned } = await req.json();
+        const adminId = (session.user as SessionUser)?.id;
+
+        if (!adminId) {
+            return new NextResponse('Admin ID not found', { status: 400 });
+        }
 
         // Update user banned status
         await prisma.user.update({
@@ -28,12 +34,12 @@ export async function POST(
                 where: { userId },
                 update: {
                     reason: 'Banned by admin',
-                    adminId: (session.user as any).id,
+                    adminId,
                 },
                 create: {
                     userId,
                     reason: 'Banned by admin',
-                    adminId: (session.user as any).id,
+                    adminId,
                 }
             });
         } else {
@@ -48,7 +54,7 @@ export async function POST(
         // Log the action
         await prisma.adminLog.create({
             data: {
-                adminId: (session.user as any).id,
+                adminId,
                 action: banned ? 'BAN_USER' : 'UNBAN_USER',
                 details: banned ? `User ${userId} banned` : `User ${userId} unbanned`
             }

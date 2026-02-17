@@ -39,12 +39,12 @@ export default function LoginPage() {
             });
             router.push('/');
             router.refresh();
-        } catch (error: any) {
+        } catch (error) {
             console.error('Login error:', error);
             toast({
                 variant: 'destructive',
                 title: 'Login Failed',
-                description: 'Invalid email or password.',
+                description: error instanceof Error ? error.message : 'Invalid email or password.',
             });
         } finally {
             setLoading(false);

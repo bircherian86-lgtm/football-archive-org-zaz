@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 export async function POST(
     req: NextRequest,
@@ -9,12 +10,17 @@ export async function POST(
     try {
         const session = await auth();
 
-        if (!session || (session.user as any)?.role !== 'ADMIN') {
+        if (!session || (session.user as SessionUser)?.role !== 'ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
         const { id: clipId } = await params;
         const { featured } = await req.json();
+        const adminId = (session.user as SessionUser)?.id;
+
+        if (!adminId) {
+            return new NextResponse('Admin ID not found', { status: 400 });
+        }
 
         // Update clip featured status
         await prisma.clip.update({
@@ -38,7 +44,7 @@ export async function POST(
         // Log the action
         await prisma.adminLog.create({
             data: {
-                adminId: (session.user as any).id,
+                adminId,
                 action: featured ? 'FEATURE_CLIP' : 'UNFEATURE_CLIP',
                 details: `Clip ${clipId} ${featured ? 'featured' : 'unfeatured'}`
             }

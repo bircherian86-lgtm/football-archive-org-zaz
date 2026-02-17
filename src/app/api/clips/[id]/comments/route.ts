@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
+import type { SessionUser } from '@/types/session';
 
 // GET - Fetch all comments for a clip
 export async function GET(
@@ -62,7 +63,11 @@ export async function POST(
             return new NextResponse('Content is required', { status: 400 });
         }
 
-        const userId = (session.user as any)?.id;
+        const userId = (session.user as SessionUser)?.id;
+        
+        if (!userId) {
+            return new NextResponse('User ID not found', { status: 400 });
+        }
         const commentId = randomBytes(16).toString('hex');
 
         await prisma.comment.create({

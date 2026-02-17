@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { unlink } from "fs/promises";
 import path from "path";
+import type { SessionUser } from '@/types/session';
 
 // GET - Fetch a single clip with uploader info
 export async function GET(
@@ -72,8 +73,8 @@ export async function DELETE(
         }
 
         // Check permissions: Admin can delete any clip, users can only delete their own
-        const userRole = (session.user as any)?.role;
-        const userId = (session.user as any)?.id;
+        const userRole = (session.user as SessionUser)?.role;
+        const userId = (session.user as SessionUser)?.id;
 
         const isAdmin = userRole === "ADMIN";
         const isOwner = clip.userId === userId;

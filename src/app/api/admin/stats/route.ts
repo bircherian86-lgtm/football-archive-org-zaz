@@ -1,12 +1,13 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 export async function GET() {
     try {
         const session = await auth();
 
-        if (!session || (session.user as any)?.role !== 'ADMIN') {
+        if (!session || (session.user as SessionUser)?.role !== 'ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 

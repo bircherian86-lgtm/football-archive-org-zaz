@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import type { SessionUser } from '@/types/session';
 
 export async function POST(req: NextRequest) {
     try {
@@ -19,7 +20,11 @@ export async function POST(req: NextRequest) {
         const profilePictureFile = formData.get('profilePicture') as File | null;
         const bannerImageFile = formData.get('bannerImage') as File | null;
 
-        const userId = (session.user as any)?.id;
+        const userId = (session.user as SessionUser)?.id;
+
+        if (!userId) {
+            return new NextResponse('User ID not found', { status: 400 });
+        }
 
         let profilePictureUrl = null;
         let bannerImageUrl = null;
@@ -49,7 +54,14 @@ export async function POST(req: NextRequest) {
         }
 
         // Update database using Prisma
-        const updateData: any = {};
+        interface UpdateData {
+            name?: string;
+            displayName?: string;
+            bio?: string;
+            profilePicture?: string;
+            bannerImage?: string;
+        }
+        const updateData: UpdateData = {};
         if (name) updateData.name = name;
         if (displayName !== undefined) updateData.displayName = displayName;
         if (bio !== undefined) updateData.bio = bio;

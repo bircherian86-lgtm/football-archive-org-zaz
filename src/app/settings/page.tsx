@@ -8,14 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, User, Camera } from 'lucide-react';
+import { Upload, Camera } from 'lucide-react';
 import Image from 'next/image';
+import type { SessionUser } from '@/types/session';
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
   const [name, setName] = useState(session?.user?.name || '');
-  const [displayName, setDisplayName] = useState((session?.user as any)?.displayName || '');
-  const [bio, setBio] = useState((session?.user as any)?.bio || '');
+  const [displayName, setDisplayName] = useState((session?.user as SessionUser)?.displayName || '');
+  const [bio, setBio] = useState((session?.user as SessionUser)?.bio || '');
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export default function SettingsPage() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const user = session?.user as any;
+  const user = session?.user as SessionUser;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

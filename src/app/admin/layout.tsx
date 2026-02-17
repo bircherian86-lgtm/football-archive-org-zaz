@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { Loader2, LayoutDashboard, Users, VideoIcon, BarChart3, Settings, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SessionUser } from '@/types/session';
 
 const adminNav = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -23,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/login');
-        } else if (status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN') {
+        } else if (status === 'authenticated' && (session?.user as SessionUser)?.role !== 'ADMIN') {
             router.push('/');
         }
     }, [status, session, router]);
@@ -36,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         );
     }
 
-    if (!session || (session?.user as any)?.role !== 'ADMIN') {
+    if (!session || (session?.user as SessionUser)?.role !== 'ADMIN') {
         return null;
     }
 

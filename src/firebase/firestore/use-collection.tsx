@@ -51,6 +51,7 @@ export interface InternalQuery extends Query<DocumentData> {
  * The Firestore CollectionReference or Query. Waits if null/undefined.
  * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useCollection<T = any>(
   memoizedTargetRefOrQuery: ((CollectionReference<DocumentData> | Query<DocumentData>) & { __memo?: boolean }) | null | undefined,
 ): UseCollectionResult<T> {

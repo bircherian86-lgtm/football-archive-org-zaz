@@ -4,6 +4,7 @@ import path from 'path';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
+import type { SessionUser } from '@/types/session';
 
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
                 fileName: filename,
                 fileSize: buffer.length,
                 tags: tags || "",
-                userId: (session.user as any)?.id || null,
+                userId: (session.user as SessionUser)?.id || null,
                 uploadDate: new Date(),
                 featured: false
             }

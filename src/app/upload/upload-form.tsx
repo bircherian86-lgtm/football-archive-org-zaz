@@ -171,12 +171,12 @@ export function UploadForm() {
       setVideoDuration(0);
       setThumbnailTime(1);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload failed: ", error);
       toast({
         variant: "destructive",
         title: "Upload Failed",
-        description: error.message || "Could not upload the clip. Please try again.",
+        description: error instanceof Error ? error.message : "Could not upload the clip. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

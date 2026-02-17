@@ -3,16 +3,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { unlink } from 'fs/promises';
 import path from 'path';
+import type { SessionUser } from '@/types/session';
 
 export async function POST(req: NextRequest) {
     try {
         const session = await auth();
 
-        if (!session || (session.user as any)?.role !== 'ADMIN') {
+        if (!session || (session.user as SessionUser)?.role !== 'ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
         const { clipIds } = await req.json();
+        const adminId = (session.user as SessionUser)?.id;
+
+        if (!adminId) {
+            return new NextResponse('Admin ID not found', { status: 400 });
+        }
 
         if (!Array.isArray(clipIds) || clipIds.length === 0) {
             return new NextResponse('Invalid clip IDs', { status: 400 });
@@ -49,7 +55,7 @@ export async function POST(req: NextRequest) {
         // Log the action
         await prisma.adminLog.create({
             data: {
-                adminId: (session.user as any).id,
+                adminId,
                 action: 'BULK_DELETE_CLIPS',
                 details: `Deleted ${clipIds.length} clips: ${clipIds.join(',')}`
             }

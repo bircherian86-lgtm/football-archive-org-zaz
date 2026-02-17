@@ -1,9 +1,11 @@
+// Firebase configuration from environment variables
+// These must be prefixed with NEXT_PUBLIC_ to be available in client-side code
 export const firebaseConfig = {
-  "projectId": "studio-1274985226-bbf70",
-  "appId": "1:1057576419542:web:9b3bd1918823cc08318977",
-  "apiKey": "AIzaSyDf19p5k6d1aWIUfTdN6QzaMzjVn753CEU",
-  "authDomain": "studio-1274985226-bbf70.firebaseapp.com",
-  "storageBucket": "studio-1274985226-bbf70.appspot.com",
-  "measurementId": "",
-  "messagingSenderId": "1057576419542"
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
 };

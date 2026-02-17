@@ -41,12 +41,12 @@ export default function SignupPage() {
                 description: 'Welcome! You can now log in.',
             });
             router.push('/login');
-        } catch (error: any) {
+        } catch (error) {
             console.error('Signup error:', error);
             toast({
                 variant: 'destructive',
                 title: 'Registration Failed',
-                description: error.message || 'Please check your details and try again.',
+                description: error instanceof Error ? error.message : 'Please check your details and try again.',
             });
         } finally {
             setLoading(false);
