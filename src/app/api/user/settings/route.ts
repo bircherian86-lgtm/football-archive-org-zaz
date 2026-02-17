@@ -1,6 +1,5 @@
-import { writeFile, mkdir } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
+import { put } from '@vercel/blob';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { SessionUser } from '@/types/session';
@@ -29,28 +28,28 @@ export async function POST(req: NextRequest) {
         let profilePictureUrl = null;
         let bannerImageUrl = null;
 
-        // Handle profile picture upload
+        // Handle profile picture upload using Vercel Blob
         if (profilePictureFile && profilePictureFile instanceof File && profilePictureFile.size > 0) {
-            const buffer = Buffer.from(await profilePictureFile.arrayBuffer());
             const filename = `profile_${userId}_${Date.now()}.${profilePictureFile.name.split('.').pop()}`;
-            const uploadDir = path.join(process.cwd(), 'public/uploads');
 
-            await mkdir(uploadDir, { recursive: true });
-            await writeFile(path.join(uploadDir, filename), buffer);
+            const blob = await put(filename, profilePictureFile, {
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN,
+            });
 
-            profilePictureUrl = `/uploads/${filename}`;
+            profilePictureUrl = blob.url;
         }
 
-        // Handle banner image upload
+        // Handle banner image upload using Vercel Blob
         if (bannerImageFile && bannerImageFile instanceof File && bannerImageFile.size > 0) {
-            const buffer = Buffer.from(await bannerImageFile.arrayBuffer());
             const filename = `banner_${userId}_${Date.now()}.${bannerImageFile.name.split('.').pop()}`;
-            const uploadDir = path.join(process.cwd(), 'public/uploads');
 
-            await mkdir(uploadDir, { recursive: true });
-            await writeFile(path.join(uploadDir, filename), buffer);
+            const blob = await put(filename, bannerImageFile, {
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN,
+            });
 
-            bannerImageUrl = `/uploads/${filename}`;
+            bannerImageUrl = blob.url;
         }
 
         // Update database using Prisma

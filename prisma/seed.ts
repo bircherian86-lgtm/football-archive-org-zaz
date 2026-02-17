@@ -1,12 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 
-const dbUrl = process.env.DATABASE_URL || 'file:./data.db';
-const dbPath = dbUrl.replace('file:', '');
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
     const adminEmail = 'admin@example.com';

@@ -26,9 +26,8 @@ export default function Home() {
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     return clips.filter(clip => {
-      // Handle Unix timestamp (seconds)
       try {
-        const uploadDate = new Date(clip.uploadDate * 1000);
+        const uploadDate = new Date(clip.uploadDate);
         return uploadDate >= oneWeekAgo;
       } catch (e) {
         return false;

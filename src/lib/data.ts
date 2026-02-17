@@ -5,6 +5,7 @@ export type Clip = {
   thumbnailUrl: string;
   fileUrl: string;
   fileName: string;
-  uploadDate: number;
+  uploadDate: string; // ISO string
   userId: string;
+  featured: boolean;
 };

@@ -19,8 +19,8 @@ interface Clip {
     fileName: string;
     tags: string;
     userId: string;
-    uploadDate: number;
-    featured: number;
+    uploadDate: string; // ISO string from API
+    featured: boolean; // Boolean from Prisma
     uploader?: {
         id: string;
         email: string;
@@ -145,7 +145,7 @@ function ClipDetailContent() {
                                     <div>
                                         <p className="font-semibold">{clip.uploader.displayName || clip.uploader.name || 'User'}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            Uploaded {new Date(clip.uploadDate * 1000).toLocaleDateString()}
+                                            Uploaded {new Date(clip.uploadDate).toLocaleDateString()}
                                         </p>
                                     </div>
                                 </div>
@@ -164,14 +164,14 @@ function ClipDetailContent() {
                             <div>
                                 <p className="text-sm text-muted-foreground">Upload Date</p>
                                 <p className="font-semibold">
-                                    {new Date(clip.uploadDate * 1000).toLocaleDateString('en-US', {
+                                    {new Date(clip.uploadDate).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
                                         day: 'numeric',
                                     })}
                                 </p>
                             </div>
-                            {clip.featured === 1 && (
+                            {clip.featured && (
                                 <div>
                                     <Badge className="bg-primary">Featured Clip</Badge>
                                 </div>

@@ -17,7 +17,7 @@ interface UserProfile {
     profilePicture?: string;
     bannerImage?: string;
     bio?: string;
-    createdAt: number;
+    createdAt: string; // ISO string from API
 }
 
 interface Clip {
@@ -26,8 +26,8 @@ interface Clip {
     thumbnailUrl: string;
     fileUrl: string;
     tags: string;
-    uploadDate: number;
-    featured: number;
+    uploadDate: string; // ISO string from API
+    featured: boolean; // Boolean from Prisma
 }
 
 export default function ProfilePage() {
@@ -36,7 +36,7 @@ export default function ProfilePage() {
 
     const [user, setUser] = useState<UserProfile | null>(null);
     const [clips, setClips] = useState<Clip[]>([]);
-    const [stats, setStats] = useState({ totalUploads: 0, joinDate: 0 });
+    const [stats, setStats] = useState({ totalUploads: 0, joinDate: '' });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -62,8 +62,9 @@ export default function ProfilePage() {
         }
     };
 
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleDateString('en-US', {
             month: 'long',
             year: 'numeric',
         });
@@ -116,7 +117,7 @@ export default function ProfilePage() {
                     </div>
 
                     {user.bio && (
-                        <p className="mt-4 text-sm">{user.bio}</p>
+                        <p className="mt-4 text-sm max-w-2xl text-neutral-300">{user.bio}</p>
                     )}
 
                     <div className="mt-4 flex gap-6 text-sm text-muted-foreground">
@@ -132,39 +133,41 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Clips Grid */}
-                <div>
+                <div className="pb-20">
                     <h2 className="mb-6 text-2xl font-bold">Uploads</h2>
                     {clips.length === 0 ? (
-                        <p className="text-muted-foreground">No uploads yet</p>
+                        <div className="rounded-xl border border-dashed border-neutral-800 py-20 text-center">
+                            <p className="text-muted-foreground">No uploads yet</p>
+                        </div>
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {clips.map((clip) => (
                                 <Link key={clip.id} href={`/clip?clip=${clip.id}`}>
-                                    <Card className="group cursor-pointer overflow-hidden border-neutral-800 bg-neutral-900/50 transition-all hover:border-primary">
+                                    <Card className="group cursor-pointer overflow-hidden border-neutral-800 bg-neutral-900/50 backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-neutral-900">
                                         <div className="relative aspect-video overflow-hidden">
                                             <Image
                                                 src={clip.thumbnailUrl}
                                                 alt={clip.title}
                                                 fill
-                                                className="object-cover transition-transform group-hover:scale-105"
+                                                className="object-cover transition-transform duration-500 group-hover:scale-110"
                                             />
-                                            {clip.featured === 1 && (
+                                            {clip.featured && (
                                                 <Badge className="absolute right-2 top-2 bg-primary">Featured</Badge>
                                             )}
                                         </div>
                                         <CardContent className="p-4">
-                                            <h3 className="line-clamp-2 font-semibold">{clip.title}</h3>
+                                            <h3 className="line-clamp-2 font-semibold group-hover:text-primary transition-colors">{clip.title}</h3>
                                             {clip.tags && (
                                                 <div className="mt-2 flex flex-wrap gap-1">
                                                     {clip.tags.split(',').slice(0, 3).map((tag, idx) => (
-                                                        <Badge key={idx} variant="outline" className="text-xs">
+                                                        <Badge key={idx} variant="secondary" className="bg-neutral-800 text-[10px] hover:bg-neutral-700">
                                                             {tag.trim()}
                                                         </Badge>
                                                     ))}
                                                 </div>
                                             )}
-                                            <p className="mt-2 text-xs text-muted-foreground">
-                                                {new Date(clip.uploadDate * 1000).toLocaleDateString()}
+                                            <p className="mt-3 text-xs text-muted-foreground">
+                                                {new Date(clip.uploadDate).toLocaleDateString()}
                                             </p>
                                         </CardContent>
                                     </Card>

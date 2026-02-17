@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { unlink } from "fs/promises";
-import path from "path";
+import { del } from "@vercel/blob";
 import type { SessionUser } from '@/types/session';
 
 // GET - Fetch a single clip with uploader info
@@ -83,21 +82,17 @@ export async function DELETE(
             return new NextResponse("Forbidden: You can only delete your own clips", { status: 403 });
         }
 
-        // Delete file from disk
+        // Delete from Vercel Blob storage
         try {
-            const filePath = path.join(process.cwd(), "public", "uploads", clip.fileName);
-            await unlink(filePath);
+            if (clip.fileUrl && clip.fileUrl.includes('vercel-storage.com')) {
+                await del(clip.fileUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
+            }
 
-            // Try to delete thumbnail if it exists
-            if (clip.thumbnailUrl && clip.thumbnailUrl.startsWith('/uploads/')) {
-                const thumbName = clip.thumbnailUrl.replace('/uploads/', '');
-                const thumbPath = path.join(process.cwd(), "public", "uploads", thumbName);
-                await unlink(thumbPath).catch(() => {
-                    // Ignore if thumbnail doesn't exist
-                });
+            if (clip.thumbnailUrl && clip.thumbnailUrl.includes('vercel-storage.com')) {
+                await del(clip.thumbnailUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
             }
         } catch (err) {
-            console.warn("Could not delete file:", err);
+            console.warn("Could not delete from Vercel Blob:", err);
         }
 
         // Delete from database

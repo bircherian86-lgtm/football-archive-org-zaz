@@ -1,6 +1,5 @@
-import { writeFile, mkdir } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
+import { put } from '@vercel/blob';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
@@ -22,33 +21,29 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No files received." }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
-    const uploadDir = path.join(process.cwd(), "public/uploads");
 
     try {
-        await mkdir(uploadDir, { recursive: true });
-
-        await writeFile(
-            path.join(uploadDir, filename),
-            buffer
-        );
+        // Upload video file to Vercel Blob
+        const videoBlob = await put(filename, file, {
+            access: 'public',
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
 
         // Handle thumbnail
         const thumbnailFile = formData.get('thumbnail') as File;
         let thumbnailUrl = "/placeholder.jpg";
 
         if (thumbnailFile) {
-            const thumbBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
             const thumbName = "thumb_" + Date.now() + "_" + thumbnailFile.name.replaceAll(" ", "_");
-            await writeFile(
-                path.join(uploadDir, thumbName),
-                thumbBuffer
-            );
-            thumbnailUrl = `/uploads/${thumbName}`;
+            const thumbnailBlob = await put(thumbName, thumbnailFile, {
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN,
+            });
+            thumbnailUrl = thumbnailBlob.url;
         }
 
-        const videoUrl = `/uploads/${filename}`;
+        const videoUrl = videoBlob.url;
         const clipId = randomBytes(16).toString('hex');
 
         // Insert into database using Prisma
@@ -59,7 +54,7 @@ export async function POST(req: NextRequest) {
                 thumbnailUrl,
                 fileUrl: videoUrl,
                 fileName: filename,
-                fileSize: buffer.length,
+                fileSize: file.size,
                 tags: tags || "",
                 userId: (session.user as SessionUser)?.id || null,
                 uploadDate: new Date(),
