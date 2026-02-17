@@ -8,30 +8,6 @@ import { z } from "zod";
 const ADMIN_USERNAME = "zazaep21";
 const ADMIN_PASSWORD = "bedwars2133";
 
-declare module "next-auth" {
-    interface User {
-        role?: string;
-        profilePicture?: string | null;
-        displayName?: string | null;
-        bannerImage?: string | null;
-        bio?: string | null;
-    }
-    interface Session {
-        user: User;
-    }
-    // Often JWT is also available under "next-auth" in some versions, but standard is next-auth/jwt
-}
-
-declare module "next-auth/jwt" {
-    interface JWT {
-        id?: string;
-        role?: string;
-        profilePicture?: string | null;
-        displayName?: string | null;
-        bannerImage?: string | null;
-        bio?: string | null;
-    }
-}
 
 async function getUser(email: string) {
     try {
@@ -140,11 +116,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id as string;
-                session.user.role = token.role;
-                session.user.profilePicture = token.profilePicture;
-                session.user.displayName = token.displayName;
-                session.user.bannerImage = token.bannerImage;
-                session.user.bio = token.bio;
+                session.user.role = token.role as string | undefined;
+                session.user.profilePicture = token.profilePicture as string | null | undefined;
+                session.user.displayName = token.displayName as string | null | undefined;
+                session.user.bannerImage = token.bannerImage as string | null | undefined;
+                session.user.bio = token.bio as string | null | undefined;
             }
             return session;
         }
