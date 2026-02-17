@@ -41,9 +41,9 @@ export function ThemeProvider({
     try {
       const storedTheme = window.localStorage.getItem(storageKey) as Theme | null
       if (storedTheme && themes.includes(storedTheme)) {
-        setTheme(storedTheme)
+        queueMicrotask(() => setTheme(storedTheme));
       }
-    } catch (e) {
+    } catch (_e) {
       // localStorage not available
     }
   }, [storageKey, themes])

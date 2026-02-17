@@ -18,7 +18,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setDocumentNonBlocking(docRef: DocumentReference, data: any, options: SetOptions) {
-  setDoc(docRef, data, options).catch(_error => {
+  setDoc(docRef, data, options).catch(_error => { // eslint-disable-line @typescript-eslint/no-unused-vars
     errorEmitter.emit(
       'permission-error',
       new FirestorePermissionError({
@@ -40,7 +40,7 @@ export function setDocumentNonBlocking(docRef: DocumentReference, data: any, opt
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function addDocumentNonBlocking(colRef: CollectionReference, data: any) {
   const promise = addDoc(colRef, data)
-    .catch(_error => {
+    .catch(_error => { // eslint-disable-line @typescript-eslint/no-unused-vars
       errorEmitter.emit(
         'permission-error',
         new FirestorePermissionError({
@@ -61,7 +61,7 @@ export function addDocumentNonBlocking(colRef: CollectionReference, data: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function updateDocumentNonBlocking(docRef: DocumentReference, data: any) {
   updateDoc(docRef, data)
-    .catch(_error => {
+    .catch(_error => { // eslint-disable-line @typescript-eslint/no-unused-vars
       errorEmitter.emit(
         'permission-error',
         new FirestorePermissionError({
@@ -80,7 +80,7 @@ export function updateDocumentNonBlocking(docRef: DocumentReference, data: any) 
  */
 export function deleteDocumentNonBlocking(docRef: DocumentReference) {
   deleteDoc(docRef)
-    .catch(_error => {
+    .catch(_error => { // eslint-disable-line @typescript-eslint/no-unused-vars
       errorEmitter.emit(
         'permission-error',
         new FirestorePermissionError({

@@ -19,7 +19,7 @@ import { Loader2, User as UserIcon, LogOut } from 'lucide-react';
 export function Header() {
   const { data: session, status } = useSession();
   const loading = status === 'loading';
-  const user = session?.user as any;
+  const user = session?.user;
   const isAdmin = user?.role === 'ADMIN';
 
   const handleLogout = async () => {
@@ -97,7 +97,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={(user as any)?.profilePicture || undefined} alt={user.displayName || 'User'} />
+                      <AvatarImage src={user?.profilePicture || undefined} alt={user.displayName || 'User'} />
                       <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -111,7 +111,7 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/profile/${(user as any).id}`} className="cursor-pointer">
+                    <Link href={`/profile/${user.id}`} className="cursor-pointer">
                       <UserIcon className="mr-2 h-4 w-4" />
                       Your Profile
                     </Link>

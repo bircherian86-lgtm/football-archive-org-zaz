@@ -1,5 +1,5 @@
 'use client';
-    
+
 import { useState, useEffect } from 'react';
 import {
   DocumentReference,
@@ -49,14 +49,18 @@ export function useDoc<T = any>(
 
   useEffect(() => {
     if (!memoizedDocRef) {
-      setData(null);
-      setIsLoading(false);
-      setError(null);
+      queueMicrotask(() => {
+        setData(null);
+        setIsLoading(false);
+        setError(null);
+      });
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      setIsLoading(true);
+      setError(null);
+    });
     // Optional: setData(null); // Clear previous data instantly
 
     const unsubscribe = onSnapshot(
@@ -71,7 +75,7 @@ export function useDoc<T = any>(
         setError(null); // Clear any previous error on successful snapshot (even if doc doesn't exist)
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
+      (_error: FirestoreError) => {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
           path: memoizedDocRef.path,

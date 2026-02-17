@@ -8,6 +8,31 @@ import { z } from "zod";
 const ADMIN_USERNAME = "zazaep21";
 const ADMIN_PASSWORD = "bedwars2133";
 
+declare module "next-auth" {
+    interface User {
+        role?: string;
+        profilePicture?: string | null;
+        displayName?: string | null;
+        bannerImage?: string | null;
+        bio?: string | null;
+    }
+    interface Session {
+        user: User;
+    }
+    // Often JWT is also available under "next-auth" in some versions, but standard is next-auth/jwt
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        id?: string;
+        role?: string;
+        profilePicture?: string | null;
+        displayName?: string | null;
+        bannerImage?: string | null;
+        bio?: string | null;
+    }
+}
+
 async function getUser(email: string) {
     try {
         return await prisma.user.findUnique({
@@ -71,12 +96,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         async jwt({ token, user, trigger, session }) {
             // When user first signs in
             if (user) {
-                token.role = (user as any).role;
+                token.role = user.role;
                 token.id = user.id;
-                token.profilePicture = (user as any).profilePicture;
-                token.displayName = (user as any).displayName;
-                token.bannerImage = (user as any).bannerImage;
-                token.bio = (user as any).bio;
+                token.profilePicture = user.profilePicture;
+                token.displayName = user.displayName;
+                token.bannerImage = user.bannerImage;
+                token.bio = user.bio;
             }
 
             // Handle session update trigger
@@ -114,12 +139,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         },
         async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = token.id;
-                (session.user as any).role = token.role;
-                (session.user as any).profilePicture = token.profilePicture;
-                (session.user as any).displayName = token.displayName;
-                (session.user as any).bannerImage = token.bannerImage;
-                (session.user as any).bio = token.bio;
+                session.user.id = token.id as string;
+                session.user.role = token.role;
+                session.user.profilePicture = token.profilePicture;
+                session.user.displayName = token.displayName;
+                session.user.bannerImage = token.bannerImage;
+                session.user.bio = token.bio;
             }
             return session;
         }

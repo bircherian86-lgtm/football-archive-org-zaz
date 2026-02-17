@@ -32,7 +32,7 @@ export function CommentSection({ clipId }: CommentSectionProps) {
     const [submitting, setSubmitting] = useState(false);
     const { toast } = useToast();
 
-    const user = session?.user as any;
+    const user = session?.user;
     const isAdmin = user?.role === 'ADMIN';
 
     useEffect(() => {
