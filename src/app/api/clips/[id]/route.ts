@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { del } from "@vercel/blob";
+import { bufferToDataUri } from "@/lib/storage";
 import type { SessionUser } from '@/types/session';
 
 // GET - Fetch a single clip with uploader info
@@ -21,7 +22,8 @@ export async function GET(
                         email: true,
                         displayName: true,
                         name: true,
-                        profilePicture: true
+                        profilePicture: true,
+                        profilePictureData: true
                     }
                 }
             }
@@ -31,18 +33,36 @@ export async function GET(
             return new NextResponse("Not Found", { status: 404 });
         }
 
+        // Convert clip binary to Data URI
+        const processedClip: any = { ...clip };
+        if (processedClip.thumbnailData) {
+            processedClip.thumbnailUrl = bufferToDataUri(processedClip.thumbnailData, 'image/png');
+        }
+
+        // Use the custom video endpoint if we have data in DB
+        if (processedClip.fileData) {
+            processedClip.fileUrl = `/api/clips/${clipId}/video`;
+        }
+
+        // Cleanup response
+        delete processedClip.thumbnailData;
+        delete processedClip.fileData;
+
+        // Process uploader data
+        if (processedClip.user) {
+            if (processedClip.user.profilePictureData) {
+                processedClip.user.profilePicture = bufferToDataUri(processedClip.user.profilePictureData, 'image/png');
+            }
+            delete processedClip.user.profilePictureData;
+        }
+
         return NextResponse.json({
             clip: {
-                ...clip,
-                uploader: clip.user ? {
-                    id: clip.user.id,
-                    email: clip.user.email,
-                    displayName: clip.user.displayName,
-                    name: clip.user.name,
-                    profilePicture: clip.user.profilePicture
-                } : null
+                ...processedClip,
+                uploader: processedClip.user ? processedClip.user : null
             }
         });
+
     } catch (error) {
         console.error("Error fetching clip:", error);
         return new NextResponse("Internal Error", { status: 500 });

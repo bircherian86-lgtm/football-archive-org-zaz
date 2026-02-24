@@ -43,3 +43,6 @@ next-env.d.ts
 /generated/prisma
 data.db
 data.db-journal
+/public/uploads/*
+!/public/uploads/.gitkeep
+

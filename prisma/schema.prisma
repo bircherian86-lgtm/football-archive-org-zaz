@@ -1,45 +1,51 @@
 datasource db {
-  provider = "postgresql"
+  provider = "cockroachdb"
   url      = env("DATABASE_URL")
 }
+
 
 generator client {
   provider = "prisma-client-js"
 }
 
 model User {
-  id             String       @id @default(cuid())
-  email          String       @unique
-  name           String?
-  password       String
-  role           String       @default("USER")
-  profilePicture String?
-  displayName    String?
-  bannerImage    String?
-  bio            String?
-  banned         Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  comments       Comment[]
-  clips          Clip[]
-  adminLogs      AdminLog[]
-  banInfo        UserBan?
+  id                 String       @id @default(cuid())
+  email              String       @unique
+  name               String?
+  password           String
+  role               String       @default("USER")
+  profilePicture     String?
+  profilePictureData Bytes?
+  displayName        String?
+  bannerImage        String?
+  bannerImageData    Bytes?
+  bio                String?
+  banned             Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  comments           Comment[]
+  clips              Clip[]
+  adminLogs          AdminLog[]
+  banInfo            UserBan?
 
   @@map("users")
 }
 
+
 model Clip {
-  id           String    @id @default(cuid())
-  title        String
-  thumbnailUrl String
-  fileUrl      String
-  fileName     String
-  tags         String    @default("")
-  fileSize     Int       @default(0)
-  userId       String?
-  uploadDate   DateTime  @default(now())
-  featured     Boolean   @default(false)
-  user         User?     @relation(fields: [userId], references: [id])
-  comments     Comment[]
+  id            String    @id @default(cuid())
+  title         String
+  thumbnailUrl  String
+  thumbnailData Bytes?
+  fileUrl       String
+  fileData      Bytes?
+  fileName      String
+  tags          String    @default("")
+  fileSize      Int       @default(0)
+  userId        String?
+  uploadDate    DateTime  @default(now())
+  featured      Boolean   @default(false)
+  user          User?     @relation(fields: [userId], references: [id])
+  comments      Comment[]
 
   @@map("clips")
 }

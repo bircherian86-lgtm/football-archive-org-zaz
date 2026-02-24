@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { fileToBuffer } from '@/lib/storage';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
@@ -24,26 +24,19 @@ export async function POST(req: NextRequest) {
     const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
 
     try {
-        // Upload video file to Vercel Blob
-        const videoBlob = await put(filename, file, {
-            access: 'public',
-            token: process.env.BLOB_READ_WRITE_TOKEN,
-        });
+        // Convert video to buffer
+        const videoBuffer = await fileToBuffer(file);
 
         // Handle thumbnail
         const thumbnailFile = formData.get('thumbnail') as File;
+        let thumbnailBuffer: Buffer | null = null;
         let thumbnailUrl = "/placeholder.jpg";
 
-        if (thumbnailFile) {
-            const thumbName = "thumb_" + Date.now() + "_" + thumbnailFile.name.replaceAll(" ", "_");
-            const thumbnailBlob = await put(thumbName, thumbnailFile, {
-                access: 'public',
-                token: process.env.BLOB_READ_WRITE_TOKEN,
-            });
-            thumbnailUrl = thumbnailBlob.url;
+        if (thumbnailFile && thumbnailFile.size > 0) {
+            thumbnailBuffer = await fileToBuffer(thumbnailFile);
+            thumbnailUrl = ""; // Clear URL as we'll use binary data
         }
 
-        const videoUrl = videoBlob.url;
         const clipId = randomBytes(16).toString('hex');
 
         // Insert into database using Prisma
@@ -52,7 +45,9 @@ export async function POST(req: NextRequest) {
                 id: clipId,
                 title: title || file.name,
                 thumbnailUrl,
-                fileUrl: videoUrl,
+                thumbnailData: thumbnailBuffer,
+                fileUrl: "", // Clear URL
+                fileData: videoBuffer,
                 fileName: filename,
                 fileSize: file.size,
                 tags: tags || "",
@@ -61,6 +56,7 @@ export async function POST(req: NextRequest) {
                 featured: false
             }
         });
+
 
         return NextResponse.json({ success: true, clipId });
     } catch (error) {

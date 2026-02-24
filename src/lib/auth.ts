@@ -95,18 +95,33 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         where: { id: token.id as string },
                         select: {
                             profilePicture: true,
+                            profilePictureData: true,
                             displayName: true,
                             bannerImage: true,
+                            bannerImageData: true,
                             bio: true
                         }
                     });
                     if (freshUser) {
-                        token.profilePicture = freshUser.profilePicture || token.profilePicture;
+                        const { bufferToDataUri } = require("@/lib/storage");
+
+                        let profilePic = freshUser.profilePicture;
+                        if (freshUser.profilePictureData) {
+                            profilePic = bufferToDataUri(freshUser.profilePictureData, 'image/png');
+                        }
+
+                        let bannerImg = freshUser.bannerImage;
+                        if (freshUser.bannerImageData) {
+                            bannerImg = bufferToDataUri(freshUser.bannerImageData, 'image/png');
+                        }
+
+                        token.profilePicture = profilePic || token.profilePicture;
                         token.displayName = freshUser.displayName || token.displayName;
-                        token.bannerImage = freshUser.bannerImage || token.bannerImage;
+                        token.bannerImage = bannerImg || token.bannerImage;
                         token.bio = freshUser.bio || token.bio;
                     }
                 } catch (e) {
+
                     console.error("JWT refresh error:", e);
                 }
             }
