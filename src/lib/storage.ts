@@ -1,5 +1,3 @@
-import prisma from './prisma';
-
 /**
  * Converts a File object to a Buffer for database storage.
  */

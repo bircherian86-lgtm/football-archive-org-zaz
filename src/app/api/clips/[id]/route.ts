@@ -34,6 +34,7 @@ export async function GET(
         }
 
         // Convert clip binary to Data URI
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const processedClip: any = { ...clip };
         if (processedClip.thumbnailData) {
             processedClip.thumbnailUrl = bufferToDataUri(processedClip.thumbnailData, 'image/png');

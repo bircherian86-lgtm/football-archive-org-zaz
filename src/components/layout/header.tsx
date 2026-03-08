@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Film, Info, Heart, Settings as SettingsIcon, Upload as UploadIcon, Shield, LayoutDashboard, Users, VideoIcon, BarChart3 } from 'lucide-react';
+import { Info, Heart, Settings as SettingsIcon, Shield, LayoutDashboard, Users, VideoIcon, BarChart3 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { MusicPlayer } from './music-player';
 import { useSession, signOut } from 'next-auth/react';

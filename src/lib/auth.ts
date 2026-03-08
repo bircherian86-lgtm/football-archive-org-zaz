@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { bufferToDataUri } from "@/lib/storage";
 
 // Admin hardcoded credentials
 const ADMIN_USERNAME = "zazaep21";
@@ -103,7 +104,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         }
                     });
                     if (freshUser) {
-                        const { bufferToDataUri } = require("@/lib/storage");
 
                         let profilePic = freshUser.profilePicture;
                         if (freshUser.profilePictureData) {

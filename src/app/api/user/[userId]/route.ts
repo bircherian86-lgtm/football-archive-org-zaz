@@ -11,6 +11,7 @@ export async function GET(
         const { userId } = await params;
 
         // Check for hardcoded admin
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let user: any;
         if (userId === 'admin') {
             user = await prisma.user.findUnique({
@@ -53,6 +54,7 @@ export async function GET(
             orderBy: { uploadDate: 'desc' }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const clipsWithDataUris = clips.map((clip: any) => {
             const clipData = { ...clip };
             if (clipData.thumbnailData) {

@@ -29,7 +29,7 @@ export default function Home() {
       try {
         const uploadDate = new Date(clip.uploadDate);
         return uploadDate >= oneWeekAgo;
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     });

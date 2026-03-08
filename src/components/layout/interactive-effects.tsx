@@ -16,7 +16,7 @@ export function InteractiveEffects() {
             if ((event.target as HTMLElement).closest('[data-interactive="true"]')) {
                 if (clickSoundRef.current) {
                     clickSoundRef.current.currentTime = 0;
-                    clickSoundRef.current.play().catch(e => { /* Ignore play errors */ });
+                    clickSoundRef.current.play().catch(_e => { /* Ignore play errors */ });
                 }
             }
         };

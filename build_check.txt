@@ -1,0 +1,122 @@
+   ??? Next.js 15.5.9
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ??? Compiled successfully in 3.7s
+   Linting and checking validity of types ...
+node.exe : 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: (:String) [], RemoteEx  
+  ception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+Failed to compile.
+
+./src/app/admin/analytics/page.tsx
+6:10  Warning: 'TrendingUp' is 
+defined but never used.  
+@typescript-eslint/no-unused-vars
+63:59  Warning: 'index' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/app/admin/clips/page.tsx
+90:18  Warning: 'error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+115:18  Warning: 'error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/app/admin/settings/page.tsx
+7:22  Warning: 'SettingsIcon' is 
+defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/app/admin/users/page.tsx
+15:31  Warning: 'Shield' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+15:39  Warning: 'UserCog' is 
+defined but never used.  
+@typescript-eslint/no-unused-vars
+48:8  Warning: React Hook useEffect 
+has a missing dependency: 
+'fetchUsers'. Either include it or 
+remove the dependency array.  
+react-hooks/exhaustive-deps
+67:18  Warning: 'error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+92:18  Warning: 'error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+119:18  Warning: 'error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/app/api/clips/route.ts
+13:49  Error: Unexpected any. 
+Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/app/api/clips/[id]/route.ts
+37:30  Error: Unexpected any. 
+Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/app/api/user/[userId]/route.ts
+14:19  Error: Unexpected any. 
+Specify a different type.  
+@typescript-eslint/no-explicit-any
+56:52  Error: Unexpected any. 
+Specify a different type.  
+@typescript-eslint/no-explicit-any
+
+./src/app/clip/page.tsx
+12:8  Warning: 'Image' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+46:8  Warning: React Hook useEffect 
+has a missing dependency: 
+'fetchClip'. Either include it or 
+remove the dependency array.  
+react-hooks/exhaustive-deps
+
+./src/app/page.tsx
+32:16  Warning: '_e' is defined but 
+never used.  
+@typescript-eslint/no-unused-vars
+
+./src/app/settings/page.tsx
+111:14  Warning: '_error' is 
+defined but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/components/comments/comment-se
+ction.tsx
+76:18  Warning: '_error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+99:18  Warning: '_error' is defined 
+but never used.  
+@typescript-eslint/no-unused-vars
+
+./src/components/layout/interactive-
+effects.tsx
+19:56  Warning: '_e' is defined but 
+never used.  
+@typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint 
+rules? Learn more here: https://next
+js.org/docs/app/api-reference/config
+/eslint#disabling-rules
+

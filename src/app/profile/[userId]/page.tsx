@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,13 +39,7 @@ export default function ProfilePage() {
     const [stats, setStats] = useState({ totalUploads: 0, joinDate: '' });
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (userId) {
-            fetchProfile();
-        }
-    }, [userId]);
-
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetch(`/api/user/${userId}`);
@@ -60,7 +54,13 @@ export default function ProfilePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId]);
+
+    useEffect(() => {
+        if (userId) {
+            fetchProfile();
+        }
+    }, [userId, fetchProfile]);
 
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A';

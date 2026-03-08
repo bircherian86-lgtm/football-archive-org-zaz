@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -35,22 +35,22 @@ export function CommentSection({ clipId }: CommentSectionProps) {
     const user = session?.user;
     const isAdmin = user?.role === 'ADMIN';
 
-    useEffect(() => {
-        fetchComments();
-    }, [clipId]);
-
-    const fetchComments = async () => {
+    const fetchComments = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetch(`/api/clips/${clipId}/comments`);
             const data = await res.json();
             setComments(data.comments || []);
-        } catch (error) {
-            console.error('Error fetching comments:', error);
+        } catch (_error) {
+            console.error('Error fetching comments:', _error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [clipId]);
+
+    useEffect(() => {
+        fetchComments();
+    }, [fetchComments]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,7 +73,7 @@ export function CommentSection({ clipId }: CommentSectionProps) {
                 title: 'Comment posted',
                 description: 'Your comment has been added.',
             });
-        } catch (error) {
+        } catch (_error) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -96,7 +96,7 @@ export function CommentSection({ clipId }: CommentSectionProps) {
             toast({
                 title: 'Comment deleted',
             });
-        } catch (error) {
+        } catch (_error) {
             toast({
                 variant: 'destructive',
                 title: 'Error',

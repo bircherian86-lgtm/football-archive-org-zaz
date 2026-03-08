@@ -5,6 +5,14 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AdminProvider } from '@/context/admin-context';
 import { InteractiveEffects } from '@/components/layout/interactive-effects';
+import { Exo_2 } from 'next/font/google';
+
+const exo2 = Exo_2({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-exo2',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Football Clips Archive',
@@ -17,11 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={exo2.variable}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
         <ThemeProvider

@@ -1,9 +1,8 @@
 'use client';
 
-import { Heart, DollarSign, Target, CalendarDays } from "lucide-react";
+import { Heart, Target, CalendarDays } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+
 import { Progress } from "@/components/ui/progress";
 
 

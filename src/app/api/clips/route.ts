@@ -10,6 +10,7 @@ export async function GET() {
             }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const processedClips = clips.map((clip: any) => {
             const processed = { ...clip };
             if (processed.thumbnailData) {

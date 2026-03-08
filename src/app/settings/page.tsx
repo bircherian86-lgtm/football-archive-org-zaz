@@ -108,7 +108,7 @@ export default function SettingsPage() {
       setProfilePicture(null);
       setBannerPreviewUrl(null);
       setBannerImage(null);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'Error',
