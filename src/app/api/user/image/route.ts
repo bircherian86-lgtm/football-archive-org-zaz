@@ -29,21 +29,25 @@ export async function GET(req: NextRequest) {
             return new NextResponse('User not found', { status: 404 });
         }
 
-        // Try local disk first based on naming convention
+        // Try local disk first
         try {
             const files = await readdir(PFP_BANNER_DIR);
             const prefix = type === 'pfp' ? `pfp_${userId}_` : `banner_${userId}_`;
-            const userFile = files.find(f => f.startsWith(prefix));
+            // Get all files for this user and type, then sort by timestamp (newest first)
+            const userFiles = files
+                .filter(f => f.startsWith(prefix))
+                .sort((a, b) => b.localeCompare(a)); // Correct sort for "prefix_userId_timestamp.ext"
 
-            if (userFile) {
-                const filePath = path.join(PFP_BANNER_DIR, userFile);
+            if (userFiles.length > 0) {
+                const newestFile = userFiles[0];
+                const filePath = path.join(PFP_BANNER_DIR, newestFile);
                 const buffer = await readFile(filePath);
-                const ext = userFile.split('.').pop() || 'png';
+                const ext = newestFile.split('.').pop() || 'png';
 
-                return new NextResponse(buffer, {
+                return new NextResponse(new Uint8Array(buffer), {
                     headers: {
-                        'Content-Type': `image/${ext === 'jpg' ? 'jpeg' : ext}`,
-                        'Cache-Control': 'public, max-age=3600',
+                        'Content-Type': `image/${ext === 'jpeg' || ext === 'jpg' ? 'jpeg' : 'png'}`,
+                        'Cache-Control': 'no-store, must-revalidate', // Disable caching for developing
                     }
                 });
             }
@@ -57,7 +61,7 @@ export async function GET(req: NextRequest) {
             return new NextResponse(new Uint8Array(dbData), {
                 headers: {
                     'Content-Type': 'image/png',
-                    'Cache-Control': 'public, max-age=3600',
+                    'Cache-Control': 'no-store, must-revalidate',
                 }
             });
         }

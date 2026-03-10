@@ -104,9 +104,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
                     if (freshUser) {
                         // Use the image or a light URL to the image API
-                        token.profilePicture = freshUser.profilePicture || `/api/user/image?type=pfp&userId=${token.id}`;
+                        token.profilePicture = freshUser.profilePicture || `/api/user/image?type=pfp&userId=${token.id}&t=${Date.now()}`;
                         token.displayName = freshUser.displayName || token.displayName;
-                        token.bannerImage = freshUser.bannerImage || `/api/user/image?type=banner&userId=${token.id}`;
+                        token.bannerImage = freshUser.bannerImage || `/api/user/image?type=banner&userId=${token.id}&t=${Date.now()}`;
                         token.bio = freshUser.bio || token.bio;
                     }
                 } catch (e) {

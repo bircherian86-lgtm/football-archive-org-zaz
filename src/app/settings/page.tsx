@@ -102,8 +102,13 @@ export default function SettingsPage() {
       if (data.displayName) setDisplayName(data.displayName || '');
       if (data.bio) setBio(data.bio || '');
 
-      // Update session
-      await update();
+      // Update session with new data
+      await update({
+        ...data,
+        profilePicture: data.profilePicture,
+        bannerImage: data.bannerImage
+      });
+
       setPreviewUrl(null);
       setProfilePicture(null);
       setBannerPreviewUrl(null);

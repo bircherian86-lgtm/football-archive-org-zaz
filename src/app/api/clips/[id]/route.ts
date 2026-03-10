@@ -52,7 +52,7 @@ export async function GET(
         if (processedClip.user) {
             const uploaderId = processedClip.user.id;
             if (processedClip.user.profilePictureData || processedClip.user.profilePicture?.startsWith('data:')) {
-                processedClip.user.profilePicture = `/api/user/image?type=pfp&userId=${uploaderId}`;
+                processedClip.user.profilePicture = `/api/user/image?type=pfp&userId=${uploaderId}&t=${Date.now()}`;
             }
             delete processedClip.user.profilePictureData;
         }

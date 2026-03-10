@@ -62,10 +62,10 @@ export async function GET(
 
         // Use the image API endpoint for profile and banner
         if (user.profilePictureData || user.profilePicture?.startsWith('data:')) {
-            user.profilePicture = `/api/user/image?type=pfp&userId=${userId}`;
+            user.profilePicture = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
         }
         if (user.bannerImageData || user.bannerImage?.startsWith('data:')) {
-            user.bannerImage = `/api/user/image?type=banner&userId=${userId}`;
+            user.bannerImage = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
         }
         delete user.profilePictureData;
         delete user.bannerImageData;

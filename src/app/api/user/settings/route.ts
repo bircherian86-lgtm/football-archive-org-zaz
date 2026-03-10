@@ -3,10 +3,24 @@ import { fileToBuffer } from '@/lib/storage';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { SessionUser } from '@/types/session';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, readdir, unlink } from 'fs/promises';
 import path from 'path';
 
 const PFP_BANNER_DIR = process.env.PFP_BANNER_DIR || path.join(process.cwd(), 'public', 'uploads');
+
+async function cleanupOldFiles(userId: string, type: 'pfp' | 'banner') {
+    try {
+        const files = await readdir(PFP_BANNER_DIR);
+        const prefix = type === 'pfp' ? `pfp_${userId}_` : `banner_${userId}_`;
+        for (const file of files) {
+            if (file.startsWith(prefix)) {
+                await unlink(path.join(PFP_BANNER_DIR, file)).catch(() => { });
+            }
+        }
+    } catch (err) {
+        console.warn('Could not cleanup old files:', err);
+    }
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -47,8 +61,13 @@ export async function POST(req: NextRequest) {
         if (displayName !== undefined) updateData.displayName = displayName;
         if (bio !== undefined) updateData.bio = bio;
 
+        const responseData: any = {};
+
         // Handle profile picture
         if (profilePictureFile && profilePictureFile instanceof File && profilePictureFile.size > 0) {
+            // Remove old ones first
+            await cleanupOldFiles(userId, 'pfp');
+
             const ext = profilePictureFile.name.split('.').pop() || 'png';
             const filename = `pfp_${userId}_${Date.now()}.${ext}`;
             const buffer = await fileToBuffer(profilePictureFile);
@@ -56,13 +75,17 @@ export async function POST(req: NextRequest) {
 
             await writeFile(filePath, buffer);
 
-            updateData.profilePicture = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
-            // Clear binary data from DB to shrink cookie size if it's currently there
-            updateData.profilePictureData = null;
+            const pfpUrl = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
+            updateData.profilePicture = pfpUrl;
+            updateData.profilePictureData = null; // Clear binary from DB
+            responseData.profilePicture = pfpUrl;
         }
 
         // Handle banner image
         if (bannerImageFile && bannerImageFile instanceof File && bannerImageFile.size > 0) {
+            // Remove old ones first
+            await cleanupOldFiles(userId, 'banner');
+
             const ext = bannerImageFile.name.split('.').pop() || 'png';
             const filename = `banner_${userId}_${Date.now()}.${ext}`;
             const buffer = await fileToBuffer(bannerImageFile);
@@ -70,9 +93,10 @@ export async function POST(req: NextRequest) {
 
             await writeFile(filePath, buffer);
 
-            updateData.bannerImage = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
-            // Clear binary data from DB
-            updateData.bannerImageData = null;
+            const bannerUrl = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
+            updateData.bannerImage = bannerUrl;
+            updateData.bannerImageData = null; // Clear binary from DB
+            responseData.bannerImage = bannerUrl;
         }
 
 
@@ -86,10 +110,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             displayName: displayName,
-            bio: bio
+            bio: bio,
+            ...responseData
         });
     } catch (error) {
-
         console.error('Error updating settings:', error);
         return new NextResponse('Internal Error', { status: 500 });
     }
