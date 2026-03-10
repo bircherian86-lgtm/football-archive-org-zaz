@@ -30,8 +30,12 @@ export async function GET() {
             if (processed.thumbnailData) {
                 processed.thumbnailUrl = bufferToDataUri(processed.thumbnailData, 'image/png');
             }
-            // Set video URL to streaming endpoint (serves from D:\SITE)
-            processed.fileUrl = `/api/clips/${processed.id}/video`;
+
+            // Use direct Blob URL if it exists, otherwise use streaming proxy
+            if (!processed.fileUrl || !processed.fileUrl.startsWith('http')) {
+                processed.fileUrl = `/api/clips/${processed.id}/video`;
+            }
+
             // Do not send binary data in the list view
             delete processed.thumbnailData;
             delete processed.fileData;

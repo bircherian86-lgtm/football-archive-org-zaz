@@ -1,26 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fileToBuffer } from '@/lib/storage';
+import { put, del } from '@vercel/blob';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { SessionUser } from '@/types/session';
-import { writeFile, mkdir, readdir, unlink } from 'fs/promises';
-import path from 'path';
-
-const PFP_BANNER_DIR = process.env.PFP_BANNER_DIR || path.join(process.cwd(), 'public', 'uploads');
-
-async function cleanupOldFiles(userId: string, type: 'pfp' | 'banner') {
-    try {
-        const files = await readdir(PFP_BANNER_DIR);
-        const prefix = type === 'pfp' ? `pfp_${userId}_` : `banner_${userId}_`;
-        for (const file of files) {
-            if (file.startsWith(prefix)) {
-                await unlink(path.join(PFP_BANNER_DIR, file)).catch(() => { });
-            }
-        }
-    } catch (err) {
-        console.warn('Could not cleanup old files:', err);
-    }
-}
 
 export async function POST(req: NextRequest) {
     try {
@@ -38,67 +20,52 @@ export async function POST(req: NextRequest) {
         const bannerImageFile = formData.get('bannerImage') as File | null;
 
         const userId = (session.user as SessionUser)?.id;
-
         if (!userId) {
             return new NextResponse('User ID not found', { status: 400 });
         }
 
-        // Ensure directory exists
-        await mkdir(PFP_BANNER_DIR, { recursive: true });
+        // Get current user to check for old blob URLs
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { profilePicture: true, bannerImage: true }
+        });
 
-        // Update database using Prisma
-        interface UpdateData {
-            name?: string;
-            displayName?: string;
-            bio?: string;
-            profilePicture?: string;
-            profilePictureData?: Buffer | null;
-            bannerImage?: string;
-            bannerImageData?: Buffer | null;
-        }
-        const updateData: UpdateData = {};
+        const updateData: any = {};
         if (name) updateData.name = name;
         if (displayName !== undefined) updateData.displayName = displayName;
         if (bio !== undefined) updateData.bio = bio;
 
-        const responseData: any = {};
+        const responseData: Record<string, string> = {};
 
-        // Handle profile picture
+        // 1. Handle Profile Picture
         if (profilePictureFile && profilePictureFile instanceof File && profilePictureFile.size > 0) {
-            // Remove old ones first
-            await cleanupOldFiles(userId, 'pfp');
+            // Delete old blob if exists
+            if (user?.profilePicture?.includes('public.blob.vercel-storage.com')) {
+                await del(user.profilePicture).catch(e => console.warn("Failed to delete old pfp blob:", e));
+            }
 
-            const ext = profilePictureFile.name.split('.').pop() || 'png';
-            const filename = `pfp_${userId}_${Date.now()}.${ext}`;
-            const buffer = await fileToBuffer(profilePictureFile);
-            const filePath = path.join(PFP_BANNER_DIR, filename);
-
-            await writeFile(filePath, buffer);
-
-            const pfpUrl = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
-            updateData.profilePicture = pfpUrl;
-            updateData.profilePictureData = null; // Clear binary from DB
-            responseData.profilePicture = pfpUrl;
+            const pfpBlob = await put(`avatars/${userId}_${Date.now()}.png`, profilePictureFile, {
+                access: 'public',
+            });
+            updateData.profilePicture = pfpBlob.url;
+            updateData.profilePictureData = null;
+            responseData.profilePicture = pfpBlob.url;
         }
 
-        // Handle banner image
+        // 2. Handle Banner Image
         if (bannerImageFile && bannerImageFile instanceof File && bannerImageFile.size > 0) {
-            // Remove old ones first
-            await cleanupOldFiles(userId, 'banner');
+            // Delete old blob if exists
+            if (user?.bannerImage?.includes('public.blob.vercel-storage.com')) {
+                await del(user.bannerImage).catch(e => console.warn("Failed to delete old banner blob:", e));
+            }
 
-            const ext = bannerImageFile.name.split('.').pop() || 'png';
-            const filename = `banner_${userId}_${Date.now()}.${ext}`;
-            const buffer = await fileToBuffer(bannerImageFile);
-            const filePath = path.join(PFP_BANNER_DIR, filename);
-
-            await writeFile(filePath, buffer);
-
-            const bannerUrl = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
-            updateData.bannerImage = bannerUrl;
-            updateData.bannerImageData = null; // Clear binary from DB
-            responseData.bannerImage = bannerUrl;
+            const bannerBlob = await put(`banners/${userId}_${Date.now()}.png`, bannerImageFile, {
+                access: 'public',
+            });
+            updateData.bannerImage = bannerBlob.url;
+            updateData.bannerImageData = null;
+            responseData.bannerImage = bannerBlob.url;
         }
-
 
         if (Object.keys(updateData).length > 0) {
             await prisma.user.update({

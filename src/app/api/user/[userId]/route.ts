@@ -60,12 +60,16 @@ export async function GET(
             return new NextResponse('User not found', { status: 404 });
         }
 
-        // Use the image API endpoint for profile and banner
-        if (user.profilePictureData || user.profilePicture?.startsWith('data:')) {
-            user.profilePicture = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
+        // Use the image API endpoint for profile and banner (only if not already a cloud URL)
+        if (!user.profilePicture || !user.profilePicture.startsWith('http')) {
+            if (user.profilePictureData || user.profilePicture?.startsWith('data:')) {
+                user.profilePicture = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
+            }
         }
-        if (user.bannerImageData || user.bannerImage?.startsWith('data:')) {
-            user.bannerImage = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
+        if (!user.bannerImage || !user.bannerImage.startsWith('http')) {
+            if (user.bannerImageData || user.bannerImage?.startsWith('data:')) {
+                user.bannerImage = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
+            }
         }
         delete user.profilePictureData;
         delete user.bannerImageData;
@@ -85,8 +89,12 @@ export async function GET(
                 clipData.thumbnailUrl = bufferToDataUri(clipData.thumbnailData, 'image/png');
                 delete clipData.thumbnailData;
             }
-            // Note: We don't convert the full video to data URI here as it would be too large for a JSON response
-            // Usually, you'd serve the video from a separate GET route that streams the Buffer.
+
+            // Handle video URL
+            if (!clipData.fileUrl || !clipData.fileUrl.startsWith('http')) {
+                clipData.fileUrl = `/api/clips/${clipData.id}/video`;
+            }
+
             delete clipData.fileData;
             return clipData;
         });

@@ -14,11 +14,16 @@ export async function GET(
 
         const clip = await prisma.clip.findUnique({
             where: { id: clipId },
-            select: { fileData: true, fileName: true }
+            select: { fileData: true, fileName: true, fileUrl: true }
         });
 
         if (!clip) {
             return new NextResponse('Video not found', { status: 404 });
+        }
+
+        // 0. Primary: If it's a Blob URL, redirect directly
+        if (clip.fileUrl && clip.fileUrl.startsWith('http')) {
+            return NextResponse.redirect(clip.fileUrl);
         }
 
         // First try: serve from local disk (D:\SITE)

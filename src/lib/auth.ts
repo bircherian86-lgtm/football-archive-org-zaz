@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { bufferToDataUri } from "@/lib/storage";
+
 
 // Admin hardcoded credentials
 const ADMIN_USERNAME = "zazaep21";

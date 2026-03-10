@@ -29,6 +29,12 @@ export async function GET(req: NextRequest) {
             return new NextResponse('User not found', { status: 404 });
         }
 
+        // 0. Primary: If it's a Vercel Blob URL, redirect directly
+        const currentImageUrl = type === 'pfp' ? user.profilePicture : user.bannerImage;
+        if (currentImageUrl && currentImageUrl.startsWith('http')) {
+            return NextResponse.redirect(currentImageUrl);
+        }
+
         // Try local disk first
         try {
             const files = await readdir(PFP_BANNER_DIR);
