@@ -15,13 +15,24 @@ export async function GET(
         let user: any;
         if (userId === 'admin') {
             user = await prisma.user.findUnique({
-                where: { id: 'admin' }
+                where: { id: 'admin' },
+                select: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    profilePicture: true,
+                    profilePictureData: true,
+                    bannerImage: true,
+                    bannerImageData: true,
+                    role: true,
+                    createdAt: true,
+                }
             });
 
             if (!user) {
                 user = {
                     id: 'admin',
-                    email: 'admin@example.com',
+                    email: 'admin@example.com', // This email is still hardcoded for the default admin object
                     name: 'Administrator',
                     displayName: 'Site Admin',
                     role: 'ADMIN',
@@ -30,7 +41,18 @@ export async function GET(
             }
         } else {
             user = await prisma.user.findUnique({
-                where: { id: userId }
+                where: { id: userId },
+                select: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    profilePicture: true,
+                    profilePictureData: true,
+                    bannerImage: true,
+                    bannerImageData: true,
+                    role: true,
+                    createdAt: true,
+                }
             });
         }
 
@@ -38,15 +60,17 @@ export async function GET(
             return new NextResponse('User not found', { status: 404 });
         }
 
-        // Convert binary images to Data URIs (simple detection for common types)
-        if (user.profilePictureData) {
-            user.profilePicture = bufferToDataUri(user.profilePictureData, 'image/png');
-            delete user.profilePictureData;
+        // Use the image API endpoint for profile and banner
+        if (user.profilePictureData || user.profilePicture?.startsWith('data:')) {
+            user.profilePicture = `/api/user/image?type=pfp&userId=${userId}`;
         }
-        if (user.bannerImageData) {
-            user.bannerImage = bufferToDataUri(user.bannerImageData, 'image/png');
-            delete user.bannerImageData;
+        if (user.bannerImageData || user.bannerImage?.startsWith('data:')) {
+            user.bannerImage = `/api/user/image?type=banner&userId=${userId}`;
         }
+        delete user.profilePictureData;
+        delete user.bannerImageData;
+        delete user.email; // Privacy: hide email on public profile
+        delete user.password; // Security: always remove password from JSON response
 
         // Get user's clips
         const clips = await prisma.clip.findMany({

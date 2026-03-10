@@ -7,6 +7,20 @@ export async function GET() {
         const clips = await prisma.clip.findMany({
             orderBy: {
                 uploadDate: 'desc'
+            },
+            select: {
+                id: true,
+                title: true,
+                thumbnailUrl: true,
+                thumbnailData: true,
+                fileUrl: true,
+                fileName: true,
+                tags: true,
+                fileSize: true,
+                userId: true,
+                uploadDate: true,
+                featured: true,
+                // Intentionally exclude fileData to avoid fetching large binary blobs
             }
         });
 
@@ -16,7 +30,9 @@ export async function GET() {
             if (processed.thumbnailData) {
                 processed.thumbnailUrl = bufferToDataUri(processed.thumbnailData, 'image/png');
             }
-            // Do not send binary video data in the list view
+            // Set video URL to streaming endpoint (serves from D:\SITE)
+            processed.fileUrl = `/api/clips/${processed.id}/video`;
+            // Do not send binary data in the list view
             delete processed.thumbnailData;
             delete processed.fileData;
             return processed;

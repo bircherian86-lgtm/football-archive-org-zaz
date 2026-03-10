@@ -1,5 +1,9 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import path from 'path';
+
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads');
 
 export async function GET(
     req: Request,
@@ -10,22 +14,42 @@ export async function GET(
 
         const clip = await prisma.clip.findUnique({
             where: { id: clipId },
-            select: { fileData: true }
+            select: { fileData: true, fileName: true }
         });
 
-        if (!clip || !clip.fileData) {
+        if (!clip) {
             return new NextResponse('Video not found', { status: 404 });
         }
 
-        // Return the video as a stream with appropriate headers
-        // Simple MPEG-4 assumption, you can store mimeType in DB if needed
-        return new NextResponse(clip.fileData, {
-            headers: {
-                'Content-Type': 'video/mp4',
-                'Content-Length': clip.fileData.length.toString(),
-                'Cache-Control': 'public, max-age=3600',
-            },
-        });
+        // First try: serve from local disk (D:\SITE)
+        if (clip.fileName) {
+            try {
+                const filePath = path.join(UPLOAD_DIR, clip.fileName);
+                const fileBuffer = await readFile(filePath);
+                return new NextResponse(new Uint8Array(fileBuffer), {
+                    headers: {
+                        'Content-Type': 'video/mp4',
+                        'Content-Length': fileBuffer.length.toString(),
+                        'Cache-Control': 'public, max-age=3600',
+                    },
+                });
+            } catch {
+                // File not on disk, fall through to DB
+            }
+        }
+
+        // Fallback: serve from DB binary (legacy clips)
+        if (clip.fileData) {
+            return new NextResponse(new Uint8Array(clip.fileData), {
+                headers: {
+                    'Content-Type': 'video/mp4',
+                    'Content-Length': clip.fileData.length.toString(),
+                    'Cache-Control': 'public, max-age=3600',
+                },
+            });
+        }
+
+        return new NextResponse('Video not found', { status: 404 });
     } catch (error) {
         console.error('Error serving video:', error);
         return new NextResponse('Internal Error', { status: 500 });

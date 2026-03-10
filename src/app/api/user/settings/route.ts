@@ -3,6 +3,10 @@ import { fileToBuffer } from '@/lib/storage';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { SessionUser } from '@/types/session';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+
+const PFP_BANNER_DIR = process.env.PFP_BANNER_DIR || path.join(process.cwd(), 'public', 'uploads');
 
 export async function POST(req: NextRequest) {
     try {
@@ -25,15 +29,18 @@ export async function POST(req: NextRequest) {
             return new NextResponse('User ID not found', { status: 400 });
         }
 
+        // Ensure directory exists
+        await mkdir(PFP_BANNER_DIR, { recursive: true });
+
         // Update database using Prisma
         interface UpdateData {
             name?: string;
             displayName?: string;
             bio?: string;
             profilePicture?: string;
-            profilePictureData?: Buffer;
+            profilePictureData?: Buffer | null;
             bannerImage?: string;
-            bannerImageData?: Buffer;
+            bannerImageData?: Buffer | null;
         }
         const updateData: UpdateData = {};
         if (name) updateData.name = name;
@@ -42,18 +49,30 @@ export async function POST(req: NextRequest) {
 
         // Handle profile picture
         if (profilePictureFile && profilePictureFile instanceof File && profilePictureFile.size > 0) {
+            const ext = profilePictureFile.name.split('.').pop() || 'png';
+            const filename = `pfp_${userId}_${Date.now()}.${ext}`;
             const buffer = await fileToBuffer(profilePictureFile);
-            updateData.profilePictureData = buffer;
-            // Clear any old URL if we're now using DB storage
-            updateData.profilePicture = "";
+            const filePath = path.join(PFP_BANNER_DIR, filename);
+
+            await writeFile(filePath, buffer);
+
+            updateData.profilePicture = `/api/user/image?type=pfp&userId=${userId}&t=${Date.now()}`;
+            // Clear binary data from DB to shrink cookie size if it's currently there
+            updateData.profilePictureData = null;
         }
 
         // Handle banner image
         if (bannerImageFile && bannerImageFile instanceof File && bannerImageFile.size > 0) {
+            const ext = bannerImageFile.name.split('.').pop() || 'png';
+            const filename = `banner_${userId}_${Date.now()}.${ext}`;
             const buffer = await fileToBuffer(bannerImageFile);
-            updateData.bannerImageData = buffer;
-            // Clear any old URL
-            updateData.bannerImage = "";
+            const filePath = path.join(PFP_BANNER_DIR, filename);
+
+            await writeFile(filePath, buffer);
+
+            updateData.bannerImage = `/api/user/image?type=banner&userId=${userId}&t=${Date.now()}`;
+            // Clear binary data from DB
+            updateData.bannerImageData = null;
         }
 
 

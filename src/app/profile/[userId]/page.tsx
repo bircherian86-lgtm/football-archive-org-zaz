@@ -11,7 +11,6 @@ import Link from 'next/link';
 
 interface UserProfile {
     id: string;
-    email: string;
     name: string;
     displayName?: string;
     profilePicture?: string;
@@ -107,12 +106,11 @@ export default function ProfilePage() {
                         <Avatar className="h-32 w-32 border-4 border-black">
                             <AvatarImage src={user.profilePicture || undefined} alt={user.displayName || user.name || 'User'} />
                             <AvatarFallback className="bg-neutral-800 text-4xl">
-                                {(user.displayName || user.name || user.email)?.charAt(0) || 'U'}
+                                {(user.displayName || user.name)?.charAt(0) || 'U'}
                             </AvatarFallback>
                         </Avatar>
                         <div className="mb-4 flex-1">
                             <h1 className="text-3xl font-bold">{user.displayName || user.name || 'User'}</h1>
-                            <p className="text-muted-foreground">{user.email}</p>
                         </div>
                     </div>
 

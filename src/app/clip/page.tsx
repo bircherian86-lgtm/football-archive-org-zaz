@@ -23,7 +23,6 @@ interface Clip {
     featured: boolean; // Boolean from Prisma
     uploader?: {
         id: string;
-        email: string;
         displayName?: string;
         name?: string;
         profilePicture?: string;
@@ -139,7 +138,7 @@ function ClipDetailContent() {
                                     <Avatar className="h-12 w-12">
                                         <AvatarImage src={clip.uploader.profilePicture || undefined} alt={clip.uploader.displayName || clip.uploader.name || 'User'} />
                                         <AvatarFallback className="bg-neutral-800">
-                                            {(clip.uploader.displayName || clip.uploader.name || clip.uploader.email)?.charAt(0) || 'U'}
+                                            {(clip.uploader.displayName || clip.uploader.name)?.charAt(0) || 'U'}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>

@@ -4,6 +4,11 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
 import type { SessionUser } from '@/types/session';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads');
 
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -21,33 +26,45 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No files received." }, { status: 400 });
     }
 
-    const filename = Date.now() + "_" + file.name.replaceAll(" ", "_");
+    if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+            { error: `File too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.` },
+            { status: 413 }
+        );
+    }
+
+    const clipId = randomBytes(16).toString('hex');
+    const filename = clipId + "_" + file.name.replaceAll(" ", "_");
 
     try {
-        // Convert video to buffer
-        const videoBuffer = await fileToBuffer(file);
+        // Ensure upload directory exists
+        await mkdir(UPLOAD_DIR, { recursive: true });
 
-        // Handle thumbnail
+        // Save video file to disk (D:\SITE or configured directory)
+        const videoBytes = await file.arrayBuffer();
+        const videoBuffer = Buffer.from(videoBytes);
+        const videoPath = path.join(UPLOAD_DIR, filename);
+        await writeFile(videoPath, videoBuffer);
+
+        // Handle thumbnail — small enough for DB storage
         const thumbnailFile = formData.get('thumbnail') as File;
         let thumbnailBuffer: Buffer | null = null;
         let thumbnailUrl = "/placeholder.jpg";
 
         if (thumbnailFile && thumbnailFile.size > 0) {
             thumbnailBuffer = await fileToBuffer(thumbnailFile);
-            thumbnailUrl = ""; // Clear URL as we'll use binary data
+            thumbnailUrl = "";
         }
 
-        const clipId = randomBytes(16).toString('hex');
-
-        // Insert into database using Prisma
+        // Insert metadata into database (video stays on disk)
         await prisma.clip.create({
             data: {
                 id: clipId,
                 title: title || file.name,
                 thumbnailUrl,
                 thumbnailData: thumbnailBuffer,
-                fileUrl: "", // Clear URL
-                fileData: videoBuffer,
+                fileUrl: "",       // Video served via /api/clips/[id]/video
+                fileData: null,    // Not storing binary in DB
                 fileName: filename,
                 fileSize: file.size,
                 tags: tags || "",
@@ -57,10 +74,9 @@ export async function POST(req: NextRequest) {
             }
         });
 
-
         return NextResponse.json({ success: true, clipId });
     } catch (error) {
-        console.log("Error occurred ", error);
-        return NextResponse.json({ Message: "Failed", status: 500 });
+        console.error("Error occurred ", error);
+        return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 }

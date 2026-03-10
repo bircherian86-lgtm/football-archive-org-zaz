@@ -56,9 +56,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 name: user.name,
                                 email: user.email,
                                 role: user.role || "USER",
-                                profilePicture: user.profilePicture,
+                                profilePicture: user.profilePicture?.startsWith('data:') ? `/api/user/image?type=pfp&userId=${user.id}` : (user.profilePicture || `/api/user/image?type=pfp&userId=${user.id}`),
                                 displayName: user.displayName,
-                                bannerImage: user.bannerImage,
+                                bannerImage: user.bannerImage?.startsWith('data:') ? `/api/user/image?type=banner&userId=${user.id}` : (user.bannerImage || `/api/user/image?type=banner&userId=${user.id}`),
                                 bio: user.bio,
                             };
                         }
@@ -89,39 +89,27 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 token.bio = session.bio || token.bio;
             }
 
-            // Fetch fresh data from DB periodically/on refresh to ensure persistence
-            if (token.id) {
+            // Fetch fresh metadata from DB periodically/on refresh to ensure persistence
+            if (token.id && token.id !== "admin") {
                 try {
                     const freshUser = await prisma.user.findUnique({
                         where: { id: token.id as string },
                         select: {
                             profilePicture: true,
-                            profilePictureData: true,
                             displayName: true,
                             bannerImage: true,
-                            bannerImageData: true,
                             bio: true
                         }
                     });
+
                     if (freshUser) {
-
-                        let profilePic = freshUser.profilePicture;
-                        if (freshUser.profilePictureData) {
-                            profilePic = bufferToDataUri(freshUser.profilePictureData, 'image/png');
-                        }
-
-                        let bannerImg = freshUser.bannerImage;
-                        if (freshUser.bannerImageData) {
-                            bannerImg = bufferToDataUri(freshUser.bannerImageData, 'image/png');
-                        }
-
-                        token.profilePicture = profilePic || token.profilePicture;
+                        // Use the image or a light URL to the image API
+                        token.profilePicture = freshUser.profilePicture || `/api/user/image?type=pfp&userId=${token.id}`;
                         token.displayName = freshUser.displayName || token.displayName;
-                        token.bannerImage = bannerImg || token.bannerImage;
+                        token.bannerImage = freshUser.bannerImage || `/api/user/image?type=banner&userId=${token.id}`;
                         token.bio = freshUser.bio || token.bio;
                     }
                 } catch (e) {
-
                     console.error("JWT refresh error:", e);
                 }
             }

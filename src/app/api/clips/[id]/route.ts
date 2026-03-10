@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { del } from "@vercel/blob";
 import { bufferToDataUri } from "@/lib/storage";
 import type { SessionUser } from '@/types/session';
+import { unlink } from 'fs/promises';
+import path from 'path';
 
 // GET - Fetch a single clip with uploader info
 export async function GET(
@@ -19,7 +21,6 @@ export async function GET(
                 user: {
                     select: {
                         id: true,
-                        email: true,
                         displayName: true,
                         name: true,
                         profilePicture: true,
@@ -40,10 +41,8 @@ export async function GET(
             processedClip.thumbnailUrl = bufferToDataUri(processedClip.thumbnailData, 'image/png');
         }
 
-        // Use the custom video endpoint if we have data in DB
-        if (processedClip.fileData) {
-            processedClip.fileUrl = `/api/clips/${clipId}/video`;
-        }
+        // Always use the video streaming endpoint (serves from D:\SITE or DB fallback)
+        processedClip.fileUrl = `/api/clips/${clipId}/video`;
 
         // Cleanup response
         delete processedClip.thumbnailData;
@@ -51,8 +50,9 @@ export async function GET(
 
         // Process uploader data
         if (processedClip.user) {
-            if (processedClip.user.profilePictureData) {
-                processedClip.user.profilePicture = bufferToDataUri(processedClip.user.profilePictureData, 'image/png');
+            const uploaderId = processedClip.user.id;
+            if (processedClip.user.profilePictureData || processedClip.user.profilePicture?.startsWith('data:')) {
+                processedClip.user.profilePicture = `/api/user/image?type=pfp&userId=${uploaderId}`;
             }
             delete processedClip.user.profilePictureData;
         }
@@ -103,7 +103,18 @@ export async function DELETE(
             return new NextResponse("Forbidden: You can only delete your own clips", { status: 403 });
         }
 
-        // Delete from Vercel Blob storage
+        // Delete video file from disk (D:\SITE)
+        if (clip.fileName) {
+            try {
+                const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads');
+                const filePath = path.join(UPLOAD_DIR, clip.fileName);
+                await unlink(filePath);
+            } catch (err) {
+                console.warn("Could not delete local file:", err);
+            }
+        }
+
+        // Delete from Vercel Blob storage (legacy)
         try {
             if (clip.fileUrl && clip.fileUrl.includes('vercel-storage.com')) {
                 await del(clip.fileUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
