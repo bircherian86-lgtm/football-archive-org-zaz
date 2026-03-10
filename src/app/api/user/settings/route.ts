@@ -30,7 +30,16 @@ export async function POST(req: NextRequest) {
             select: { profilePicture: true, bannerImage: true }
         });
 
-        const updateData: any = {};
+        interface UpdateData {
+            name?: string;
+            displayName?: string;
+            bio?: string;
+            profilePicture?: string;
+            profilePictureData?: null;
+            bannerImage?: string;
+            bannerImageData?: null;
+        }
+        const updateData: UpdateData = {};
         if (name) updateData.name = name;
         if (displayName !== undefined) updateData.displayName = displayName;
         if (bio !== undefined) updateData.bio = bio;

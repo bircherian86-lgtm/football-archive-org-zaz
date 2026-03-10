@@ -114,7 +114,7 @@ export async function DELETE(
                 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads');
                 const filePath = path.join(UPLOAD_DIR, clip.fileName);
                 await unlink(filePath).catch(() => { });
-            } catch (err) {
+            } catch {
                 // Silently ignore if file doesn't exist
             }
         }
